@@ -2,16 +2,22 @@ package ProyectoDos;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 // * @author Jaziel
 public class Ventana extends javax.swing.JFrame {
-
+    
     String[] col = {"Numero de control", "Nombre", "Promedio"};
     DefaultTableModel modelo = new DefaultTableModel(col, 0);
     ArrayList<Alumnos> alumnos = new ArrayList<Alumnos>();
-
+    
     public Ventana() {
         initComponents();
         this.setLocationRelativeTo(null);
@@ -20,10 +26,13 @@ public class Ventana extends javax.swing.JFrame {
         Ventana.setDefaultCloseOperation(1);
         Ventana.setSize(390, 200);
 
+        //Cargando datos desde el archivo
+        cargarDesdeArchivo();
+
         /*Validacion de los campos de texto*/
         validarCampos();
     }
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -121,6 +130,11 @@ public class Ventana extends javax.swing.JFrame {
                 ModificarMouseClicked(evt);
             }
         });
+        Modificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ModificarActionPerformed(evt);
+            }
+        });
         getContentPane().add(Modificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(132, 362, -1, -1));
 
         Eliminar.setText("Eliminar");
@@ -129,12 +143,22 @@ public class Ventana extends javax.swing.JFrame {
                 EliminarMouseClicked(evt);
             }
         });
+        Eliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EliminarActionPerformed(evt);
+            }
+        });
         getContentPane().add(Eliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(221, 362, -1, -1));
 
         Guardar.setText("Guardar");
         Guardar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 GuardarMouseClicked(evt);
+            }
+        });
+        Guardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GuardarActionPerformed(evt);
             }
         });
         getContentPane().add(Guardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(303, 362, -1, -1));
@@ -202,6 +226,21 @@ public class Ventana extends javax.swing.JFrame {
         // TODO add your handling code here:
         Ventana.dispose();
     }//GEN-LAST:event_Salir1ActionPerformed
+
+    private void GuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuardarActionPerformed
+        // TODO add your handling code here:
+        guardarTabla();
+    }//GEN-LAST:event_GuardarActionPerformed
+
+    private void ModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModificarActionPerformed
+        // TODO add your handling code here:
+        modificar(jTable1);
+    }//GEN-LAST:event_ModificarActionPerformed
+
+    private void EliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EliminarActionPerformed
+        // TODO add your handling code here:
+        eliminarFila(jTable1);
+    }//GEN-LAST:event_EliminarActionPerformed
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -209,16 +248,51 @@ public class Ventana extends javax.swing.JFrame {
             }
         });
     }
-
+    
     public void guardarTabla() {
-        //String titulos[] = {"Numero de control", "Nombre", "Promedio"};                
-        for (int i = 0; i < alumnos.size(); i++) {
-            int numControl = alumnos.get(i).getNumControl();
-            String nombreAlumno = alumnos.get(i).getNombre();
-            double promedioAlumno = alumnos.get(i).getPromedio();
-            System.out.println("Num Ctrl: "+alumnos.get(i).getNumControl()+" Nombre: "+alumnos.get(i).getNombre()+" Promedio: "+alumnos.get(i).getPromedio());
+        try {
+            String ruta = "archivo.txt";
+            String cadena = "";
+            for (int i = 0; i < alumnos.size(); i++) {
+                int numControl = alumnos.get(i).getNumControl();
+                String nombreAlumno = alumnos.get(i).getNombre();
+                double promedioAlumno = alumnos.get(i).getPromedio();
+                System.out.println(alumnos.get(i).getNumControl() + " " + alumnos.get(i).getNombre() + " " + alumnos.get(i).getPromedio());
+                cadena += alumnos.get(i).getNumControl() + " " + alumnos.get(i).getNombre() + " " + alumnos.get(i).getPromedio() + "\n";
+            }
+            File file = new File(ruta);
+
+            //Si el archivo no existe es creado
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            
+            FileWriter fw = new FileWriter(file);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(cadena);
+            bw.close();
+        } catch (Exception e) {
+            System.err.println("Error code: " + e.getMessage());
         }
-        System.out.println(modelo.getRowCount());
+    }
+    
+    public void cargarDesdeArchivo() {
+        try {
+            Scanner input = new Scanner(new File("archivo.txt"));
+            while (input.hasNextLine()) {
+                String line = input.nextLine();
+                String elementos[] = line.split("\\s");
+                int numCtrl = Integer.parseInt(elementos[0]);
+                String nombre = elementos[1];
+                double promedio = Double.parseDouble(elementos[2]);
+                Object[] data = {numCtrl, nombre, promedio};
+                modelo.addRow(data);
+                System.out.println(line);
+            }
+            input.close();
+        } catch (Exception e) {
+            System.err.println("Error code: " + e.getMessage());
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -277,5 +351,31 @@ public class Ventana extends javax.swing.JFrame {
                 }
             }
         });
+    }
+    
+    private void modificar(JTable jTable1) {
+        modelo = (DefaultTableModel) jTable1.getModel();
+        int fila = jTable1.getSelectedRow();
+        try {
+            /*int numCtrl = Integer.parseInt(jTable1.getValueAt(fila, 0).toString());
+            String nombre = jTable1.getValueAt(fila, 1).toString();
+            double promedio = Double.parseDouble(jTable1.getValueAt(fila, 2).toString());*/
+            nombreTxf.setText(jTable1.getValueAt(fila, 1).toString());
+            numeroCtrl.setText(jTable1.getValueAt(fila, 0).toString());
+            promedioTxf.setText(jTable1.getValueAt(fila, 2).toString());
+            Ventana.setVisible(true);
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Error code: " + e.getMessage());
+        }
+    }
+    
+    private void eliminarFila(JTable jTable1) {
+        modelo = (DefaultTableModel) jTable1.getModel();
+        int fila = jTable1.getSelectedRow();
+        try {
+            modelo.removeRow(fila);
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Error code: " + e.getMessage());
+        }
     }
 }
