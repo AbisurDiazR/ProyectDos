@@ -8,31 +8,33 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 // * @author Jaziel
 public class Ventana extends javax.swing.JFrame {
-    
+
     String[] col = {"Numero de control", "Nombre", "Promedio"};
     DefaultTableModel modelo = new DefaultTableModel(col, 0);
     ArrayList<Alumnos> alumnos = new ArrayList<Alumnos>();
-    
+
     public Ventana() {
         initComponents();
         this.setLocationRelativeTo(null);
-        jTable1.setModel(modelo);
+        jTable1.setModel(modelo);   
+        jTable1.setDefaultEditor(Object.class, null); //volver no editables las celdas
         Ventana.setLocationRelativeTo(null);
         Ventana.setDefaultCloseOperation(1);
-        Ventana.setSize(390, 200);
-
+        Ventana.setSize(390, 200);      
+        
         //Cargando datos desde el archivo
         cargarDesdeArchivo();
 
         /*Validacion de los campos de texto*/
         validarCampos();
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -169,6 +171,11 @@ public class Ventana extends javax.swing.JFrame {
                 SalirMouseClicked(evt);
             }
         });
+        Salir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SalirActionPerformed(evt);
+            }
+        });
         getContentPane().add(Salir, new org.netbeans.lib.awtextra.AbsoluteConstraints(385, 362, -1, -1));
 
         pack();
@@ -210,21 +217,32 @@ public class Ventana extends javax.swing.JFrame {
 
     private void Guardar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Guardar1ActionPerformed
         // TODO add your handling code here:        
-        int numControl = Integer.parseInt(numeroCtrl.getText());
-        String nombreAlumno = nombreTxf.getText();
-        double promedioAlumno = Double.parseDouble(promedioTxf.getText());
-        alumnos.add(new Alumnos(nombreAlumno, numControl, promedioAlumno));
-        Object[] data = {numControl, nombreAlumno, promedioAlumno};
-        modelo.addRow(data);
-        nombreTxf.setText("");
-        numeroCtrl.setText("");
-        promedioTxf.setText("");
-        Ventana.dispose();
+        if (numeroCtrl.getText().length() < 8) {
+            JOptionPane.showMessageDialog(null, "El numero de control debe ser de 8 caracteres");
+        } else {
+            int numControl = Integer.parseInt(numeroCtrl.getText());
+            String nombreAlumno = nombreTxf.getText();
+            double promedioAlumno = Double.parseDouble(promedioTxf.getText());
+            alumnos.add(new Alumnos(nombreAlumno, numControl, promedioAlumno));
+            Object[] data = {numControl, nombreAlumno, promedioAlumno};
+            modelo.addRow(data);
+            nombreTxf.setText("");
+            numeroCtrl.setText("");
+            promedioTxf.setText("");
+            Ventana.dispose();
+        }
     }//GEN-LAST:event_Guardar1ActionPerformed
 
     private void Salir1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Salir1ActionPerformed
         // TODO add your handling code here:
-        Ventana.dispose();
+        String numControl = numeroCtrl.getText();
+        String nombre = nombreTxf.getText();
+        String promedio = promedioTxf.getText();
+        if (numControl.length() == 0 || nombre.length() == 0 || promedio.length() == 0) {
+            JOptionPane.showMessageDialog(null, "Por favor llene todos los campos antes de salir");
+        } else {
+            Ventana.dispose();
+        }
     }//GEN-LAST:event_Salir1ActionPerformed
 
     private void GuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuardarActionPerformed
@@ -241,6 +259,10 @@ public class Ventana extends javax.swing.JFrame {
         // TODO add your handling code here:
         eliminarFila(jTable1);
     }//GEN-LAST:event_EliminarActionPerformed
+
+    private void SalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalirActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_SalirActionPerformed
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -248,7 +270,7 @@ public class Ventana extends javax.swing.JFrame {
             }
         });
     }
-    
+
     public void guardarTabla() {
         try {
             String ruta = "archivo.txt";
@@ -266,7 +288,7 @@ public class Ventana extends javax.swing.JFrame {
             if (!file.exists()) {
                 file.createNewFile();
             }
-            
+
             FileWriter fw = new FileWriter(file);
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(cadena);
@@ -275,7 +297,7 @@ public class Ventana extends javax.swing.JFrame {
             System.err.println("Error code: " + e.getMessage());
         }
     }
-    
+
     public void cargarDesdeArchivo() {
         try {
             Scanner input = new Scanner(new File("archivo.txt"));
@@ -320,7 +342,7 @@ public class Ventana extends javax.swing.JFrame {
             public void keyPressed(KeyEvent ke) {
                 super.keyPressed(ke); //To change body of generated methods, choose Tools | Templates.
                 char ch = ke.getKeyChar();
-                if (Character.isDigit(ch)) {
+                if (Character.isDigit(ch) || ke.getKeyCode() == 8) {
                 } else {
                     System.out.println("Solo se admiten numeros");
                     numeroCtrl.setText("");
@@ -332,7 +354,7 @@ public class Ventana extends javax.swing.JFrame {
             public void keyPressed(KeyEvent ke) {
                 super.keyPressed(ke); //To change body of generated methods, choose Tools | Templates.
                 char ch = ke.getKeyChar();
-                if (Character.isDigit(ch) || ke.getKeyCode() == KeyEvent.VK_PERIOD) {
+                if (Character.isDigit(ch) || ke.getKeyCode() == KeyEvent.VK_PERIOD || ke.getKeyCode() == 8) {
                 } else {
                     System.out.println("Solo se admiten numeros y/o puntos");
                     promedioTxf.setText("");
@@ -344,7 +366,7 @@ public class Ventana extends javax.swing.JFrame {
             public void keyPressed(KeyEvent ke) {
                 super.keyPressed(ke); //To change body of generated methods, choose Tools | Templates.
                 char ch = ke.getKeyChar();
-                if (Character.isAlphabetic(ch)) {
+                if (Character.isAlphabetic(ch) || ke.getKeyCode() == 8) {
                 } else {
                     System.out.println("Solo se admiten valores alfabeticos");
                     nombreTxf.setText("");
@@ -352,14 +374,11 @@ public class Ventana extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private void modificar(JTable jTable1) {
         modelo = (DefaultTableModel) jTable1.getModel();
         int fila = jTable1.getSelectedRow();
         try {
-            /*int numCtrl = Integer.parseInt(jTable1.getValueAt(fila, 0).toString());
-            String nombre = jTable1.getValueAt(fila, 1).toString();
-            double promedio = Double.parseDouble(jTable1.getValueAt(fila, 2).toString());*/
             nombreTxf.setText(jTable1.getValueAt(fila, 1).toString());
             numeroCtrl.setText(jTable1.getValueAt(fila, 0).toString());
             promedioTxf.setText(jTable1.getValueAt(fila, 2).toString());
@@ -368,7 +387,7 @@ public class Ventana extends javax.swing.JFrame {
             System.err.println("Error code: " + e.getMessage());
         }
     }
-    
+
     private void eliminarFila(JTable jTable1) {
         modelo = (DefaultTableModel) jTable1.getModel();
         int fila = jTable1.getSelectedRow();
